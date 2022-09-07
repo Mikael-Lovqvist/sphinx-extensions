@@ -24,7 +24,7 @@ def visit_data_packet_html(self, node):
 		else:
 			border = ''
 
-		return f'<div style="display: table-cell; padding: 5px 10px; background-color: var(--pst-color-surface){border}"><p style="color: var(--pst-color-inline-code); margin: 0;">{field.title}</p><p style="margin: 0;">{field.size} bytes</p></div>'
+		return f'<div style="display: table-cell; padding: 5px 10px; background-color: var(--pst-color-surface){border}"><p style="color: var(--pst-color-inline-code); margin: 0;">{field.title}</p><p style="margin: 0;">{field.size}{node["suffix"]}</p></div>'
 
 	packet_columns = [format_field(index, field) for index, field in enumerate(node['packet'])]
 	count = len(node['packet'])
@@ -56,7 +56,12 @@ class data_packet(Directive):
 			else:
 				target = next(pending_targets)
 
-		[name] = options
+		name = options.pop(0)
+
+		suffix = ' bytes'
+		for opt in options:
+			if opt == ':no-suffix:':
+				suffix = ''
 
 		packet = list()
 		for item in data:
@@ -66,6 +71,7 @@ class data_packet(Directive):
 		return [data_packet_node(
 			name=name,
 			packet=packet,
+			suffix=suffix,
 		)]
 
 def setup(app):
